@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: laboratoireservice-app:dev
+    container_name: laboratoireService_app
+    env_file:
+      - ../.env
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - "3001:3001"
+    volumes:
+      - ../src:/app/src
+      - ../package.json:/app/package.json
+      - ../package-lock.json:/app/package-lock.json
+    command: ["npm", "run", "dev"]
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - laboratoireService-net
+
+  mongo:
+    image: mongo:6.0
+    logging:
+      driver: "none"
+    container_name: laboratoireService_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-laboratoireService}
+    volumes:
+      - labo_mongo_data:/data/db
+    networks:
+      - laboratoireService-net
+    ports:
+      # Port 27018 mn bara, bach maytda7emch m3a CliniqueService
+      - "27018:27017"
+    command: ["mongod", "--bind_ip_all"]
+
+  redis:
+    image: redis:7-alpine
+    container_name: laboratoireService_redis
+    restart: unless-stopped
+    ports:
+      # Port 6380 mn bara
+      - "6380:6379"
+    volumes:
+      - labo_redis_data:/data
+    networks:
+      - laboratoireService-net
+
+volumes:
+  labo_mongo_data:
+  labo_redis_data:
+
+networks:
+  laboratoireService-net:
+    driver: bridge
