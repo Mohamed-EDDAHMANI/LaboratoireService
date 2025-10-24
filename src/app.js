@@ -13,7 +13,7 @@ import { initRedis } from './config/redis.js';
 
 
 // ===== Import Routes =====
-// import routes from "./routes/index.js";
+import orderRoutes from "./routes/index.js";
 
 // ===== Initialize App =====
 const app = express();
@@ -32,10 +32,11 @@ app.use(morgan('dev'));
 
 // ===== Health Check =====
 app.get("/health", (req, res) => res.status(200).send("OK"));
-app.get("/", (req, res) => res.send("Laboratoireservice API is running 🚀"));
+app.get("/", (req, res) => res.send("____Laboratoireservice API is running 🚀"));
+
 
 // ===== API Routes =====
-// app.use('/api', routes);
+app.use('/v1', orderRoutes);
 
 
 // ===== 404 Handler =====
